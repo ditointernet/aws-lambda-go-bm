@@ -19,8 +19,13 @@ func TrackHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxy
 
 	event.ReceivedAt = iso8601.Time(time.Now())
 
+	data, err := json.Marshal(event)
+	if err != nil {
+		return SendError(err)
+	}
+
 	client := NewClient()
-	response, err := TrackEvent(client, &event)
+	response, err := TrackEvent(client, data)
 
 	if err != nil {
 		return SendError(err)

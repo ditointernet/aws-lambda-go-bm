@@ -8,7 +8,8 @@ type Track struct {
 	ReceivedAt iso8601.Time `json:"received_at"`
 }
 
-// TrackBulk defines a bulk of track events
-type TrackBulk struct {
-	Records []Track
+// Bulk defines a bulk of track events
+type Bulk struct {
+	Records    []Track
+	ReceivedAt iso8601.Time
 }
