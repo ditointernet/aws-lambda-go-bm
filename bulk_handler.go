@@ -18,7 +18,7 @@ func BulkHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyR
 		return SendError(err)
 	}
 
-	chunks, err := generateChunks(bulk.Records, 1)
+	chunks, err := generateChunks(bulk.Records, 500)
 	if err != nil {
 		return SendError(err)
 	}
@@ -31,17 +31,17 @@ func BulkHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyR
 	}
 
 	var failedRecordCount int64
-	var recordsResult []*kinesis.PutRecordsResultEntry
+	var results []*kinesis.PutRecordsResultEntry
 
 	for i := 0; i < len(chunks); i++ {
 		message := <-ch
 		failedRecordCount += *message.Response.FailedRecordCount
-		recordsResult = append(recordsResult, message.Response.Records...)
+		results = append(results, message.Response.Records...)
 	}
 
 	response := kinesis.PutRecordsOutput{
 		FailedRecordCount: &failedRecordCount,
-		Records:           recordsResult,
+		Records:           results,
 	}
 	return SendSuccess(response.String())
 }
