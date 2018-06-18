@@ -19,7 +19,7 @@ Parameters:
 #       Type: Canary10Percent5Minutes
 
 Resources:
-  GetHelloWorld:
+  Tracker:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main
