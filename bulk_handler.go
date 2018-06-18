@@ -10,37 +10,25 @@ import (
 )
 
 // BulkHandler handles incoming request from /track/bulk path
-func BulkHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func BulkHandler(request events.APIGatewayProxyRequest) (string, error) {
 	var bulk Bulk
 	err := json.Unmarshal([]byte(request.Body), &bulk)
 
 	if err != nil {
-		return SendError(err)
+		return "", err
 	}
 
 	chunks, err := generateChunks(bulk.Records, 500)
 	if err != nil {
-		return SendError(err)
+		return "", err
 	}
 
-	client := NewClient()
-	ch := make(chan PutRecordsMessage)
+	response, err := asyncTrackBulk(chunks)
 
-	for _, chunk := range chunks {
-		go TrackBulk(client, chunk, ch)
-	}
-
-	var messages []PutRecordsMessage
-
-	for i := 0; i < len(chunks); i++ {
-		messages = append(messages, <-ch)
-	}
-
-	response, err := mergeResponseMessages(messages)
 	if err != nil {
-		return SendError(err)
+		return "", err
 	}
-	return SendSuccess(response.String())
+	return response.String(), nil
 }
 
 func generateChunks(records []Track, chunkSize int) ([][][]byte, error) {
@@ -68,6 +56,23 @@ func generateChunks(records []Track, chunkSize int) ([][][]byte, error) {
 	}
 
 	return chunks, nil
+}
+
+func asyncTrackBulk(chunks [][][]byte) (kinesis.PutRecordsOutput, error) {
+	client := NewClient()
+	ch := make(chan PutRecordsMessage)
+
+	for _, chunk := range chunks {
+		go TrackBulk(client, chunk, ch)
+	}
+
+	var messages []PutRecordsMessage
+
+	for i := 0; i < len(chunks); i++ {
+		messages = append(messages, <-ch)
+	}
+
+	return mergeResponseMessages(messages)
 }
 
 func mergeResponseMessages(messages []PutRecordsMessage) (kinesis.PutRecordsOutput, error) {

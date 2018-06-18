@@ -9,27 +9,27 @@ import (
 )
 
 // TrackHandler handles incoming request from /track path
-func TrackHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func TrackHandler(request events.APIGatewayProxyRequest) (string, error) {
 	var event Track
 	err := json.Unmarshal([]byte(request.Body), &event)
 
 	if err != nil {
-		return SendError(err)
+		return "", err
 	}
 
 	event.ReceivedAt = iso8601.Time(time.Now())
 
 	data, err := json.Marshal(event)
 	if err != nil {
-		return SendError(err)
+		return "", err
 	}
 
 	client := NewClient()
 	response, err := TrackEvent(client, data)
 
 	if err != nil {
-		return SendError(err)
+		return "", err
 	}
 
-	return SendSuccess(response.String())
+	return response.String(), nil
 }

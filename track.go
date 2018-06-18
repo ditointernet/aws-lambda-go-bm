@@ -1,6 +1,8 @@
 package main
 
-import "github.com/uudashr/iso8601"
+import (
+	"github.com/uudashr/iso8601"
+)
 
 // Track defines track event structure
 type Track struct {
