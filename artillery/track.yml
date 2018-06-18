@@ -13,12 +13,12 @@ config:
     production:
       target: 'https://9y49qansil.execute-api.us-east-1.amazonaws.com/Prod'
       phases:
-        - duration: 120
+        - duration: 300
           arrivalRate: 10
-          rampTo: 50
+          rampTo: 100
           name: "Warm up the application"
         - duration: 600
-          arrivalRate: 50
+          arrivalRate: 100
           name: "Sustained max load"
 
 scenarios:
