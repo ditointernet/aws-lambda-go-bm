@@ -12,11 +12,9 @@ import (
 func TrackHandler(request events.APIGatewayProxyRequest) (string, error) {
 	var event Track
 	err := json.Unmarshal([]byte(request.Body), &event)
-
 	if err != nil {
 		return "", err
 	}
-
 	event.ReceivedAt = iso8601.Time(time.Now())
 
 	data, err := json.Marshal(event)
